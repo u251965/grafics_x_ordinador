@@ -33,8 +33,8 @@ void Application::Init(void)
 void Application::Render(void)
 {
 	framebuffer.Fill(Color::BLUE);
-	framebuffer.DrawLineDDA(500, 500, 30, 20, Color::WHITE);
-	framebuffer.DrawRect(200, 150, 300, 200,
+	framebuffer.DrawLineDDA(500, 500, 30, 20, Color::BLACK);  //proba de linia amb l'algoritme DDA
+	framebuffer.DrawRect(200, 150, 300, 200,				//proba de rectangle
 		Color::WHITE,
 		borderWidth,
 		true,
