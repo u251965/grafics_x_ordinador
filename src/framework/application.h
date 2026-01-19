@@ -1,4 +1,4 @@
-/*  
+/*
 	+ This class encapsulates the application, is in charge of creating the data, getting the user input, process the update and render.
 */
 
@@ -20,6 +20,8 @@ public:
 
 	float time;
 
+	int borderWidth = 1;
+
 	// Input
 	const Uint8* keystate;
 	int mouse_state; // Tells which buttons are pressed
@@ -40,13 +42,13 @@ public:
 	Application(const char* caption, int width, int height);
 	~Application();
 
-	void Init( void );
-	void Render( void );
-	void Update( float dt );
+	void Init(void);
+	void Render(void);
+	void Update(float dt);
 
 	// Other methods to control the app
 	void SetWindowSize(int width, int height) {
-		glViewport( 0,0, width, height );
+		glViewport(0, 0, width, height);
 		this->window_width = width;
 		this->window_height = height;
 		this->framebuffer.Resize(width, height);
@@ -54,8 +56,8 @@ public:
 
 	Vector2 GetWindowSize()
 	{
-		int w,h;
-		SDL_GetWindowSize(window,&w,&h);
+		int w, h;
+		SDL_GetWindowSize(window, &w, &h);
 		return Vector2(float(w), float(h));
 	}
 };

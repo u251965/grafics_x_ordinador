@@ -7,8 +7,8 @@ Application::Application(const char* caption, int width, int height)
 {
 	this->window = createWindow(caption, width, height);
 
-	int w,h;
-	SDL_GetWindowSize(window,&w,&h);
+	int w, h;
+	SDL_GetWindowSize(window, &w, &h);
 
 	this->mouse_state = 0;
 	this->time = 0.f;
@@ -29,12 +29,22 @@ void Application::Init(void)
 }
 
 // Render one frame
+
 void Application::Render(void)
 {
-	// ...
+	framebuffer.Fill(Color::YELLOW);
+	framebuffer.DrawLineDDA(500, 500, 30, 20, Color::WHITE);
+	framebuffer.DrawRect(200, 150, 300, 200,
+		Color::WHITE,
+		borderWidth,
+		true,
+		Color::RED
+	);
+
 
 	framebuffer.Render();
 }
+
 
 // Called after render
 void Application::Update(float seconds_elapsed)
@@ -43,22 +53,33 @@ void Application::Update(float seconds_elapsed)
 }
 
 //keyboard press event 
-void Application::OnKeyPressed( SDL_KeyboardEvent event )
+void Application::OnKeyPressed(SDL_KeyboardEvent event)
 {
 	// KEY CODES: https://wiki.libsdl.org/SDL2/SDL_Keycode
-	switch(event.keysym.sym) {
-		case SDLK_ESCAPE: exit(0); break; // ESC key, kill the app
+	switch (event.keysym.sym) {
+	case SDLK_ESCAPE: exit(0); break; // ESC key, kill the app
+	case SDLK_PLUS:
+	case SDLK_KP_PLUS:
+		borderWidth++;
+		break;
+
+	case SDLK_MINUS:
+	case SDLK_KP_MINUS:
+		if (borderWidth > 1)
+			borderWidth--;
+		break;
+
 	}
 }
 
-void Application::OnMouseButtonDown( SDL_MouseButtonEvent event )
+void Application::OnMouseButtonDown(SDL_MouseButtonEvent event)
 {
 	if (event.button == SDL_BUTTON_LEFT) {
 
 	}
 }
 
-void Application::OnMouseButtonUp( SDL_MouseButtonEvent event )
+void Application::OnMouseButtonUp(SDL_MouseButtonEvent event)
 {
 	if (event.button == SDL_BUTTON_LEFT) {
 
@@ -67,7 +88,7 @@ void Application::OnMouseButtonUp( SDL_MouseButtonEvent event )
 
 void Application::OnMouseMove(SDL_MouseButtonEvent event)
 {
-	
+
 }
 
 void Application::OnWheel(SDL_MouseWheelEvent event)
@@ -78,6 +99,6 @@ void Application::OnWheel(SDL_MouseWheelEvent event)
 }
 
 void Application::OnFileChanged(const char* filename)
-{ 
+{
 	Shader::ReloadSingleShader(filename);
 }
