@@ -32,7 +32,7 @@ void Application::Init(void)
 
 void Application::Render(void)
 {
-	framebuffer.Fill(Color::YELLOW);
+	framebuffer.Fill(Color::BLUE);
 	framebuffer.DrawLineDDA(500, 500, 30, 20, Color::WHITE);
 	framebuffer.DrawRect(200, 150, 300, 200,
 		Color::WHITE,
