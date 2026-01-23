@@ -7,6 +7,9 @@
 #include "main/includes.h"
 #include "framework.h"
 #include "image.h"
+#include <vector>
+#include "button.h"   
+
 
 class Application
 {
@@ -38,6 +41,25 @@ public:
 	// CPU Global framebuffer
 	Image framebuffer;
 
+	enum Mode { MODE_PAINT, MODE_ANIM };
+	enum Tool { TOOL_PENCIL, TOOL_ERASER, TOOL_LINE, TOOL_RECT, TOOL_TRI };
+
+	Mode mode = MODE_PAINT;
+	Tool currentTool = TOOL_PENCIL;
+
+	bool fillShapes = false;
+
+	Color currentColor = Color::WHITE;
+
+	Image canvas;
+
+	bool isDragging = false;
+	Vector2 startPos;
+	Vector2 lastPos;
+	Vector2 currentPos;
+
+	std::vector<Button> buttons;
+
 	// Constructor and main methods
 	Application(const char* caption, int width, int height);
 	~Application();
@@ -45,6 +67,8 @@ public:
 	void Init(void);
 	void Render(void);
 	void Update(float dt);
+
+
 
 	// Other methods to control the app
 	void SetWindowSize(int width, int height) {

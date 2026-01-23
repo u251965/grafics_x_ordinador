@@ -9,6 +9,16 @@
 #include "camera.h"
 #include "mesh.h"
 #include <cmath> 
+#include <vector>
+
+
+struct Edge
+{
+	int yMax;
+	float x;
+	float invSlope;
+};
+
 
 Image::Image() {
 	width = 0; height = 0;
@@ -119,6 +129,103 @@ void Image::DrawRect(int x, int y, int w, int h, const Color& borderColor, int b
 		for (int j = y + k; j < y + h - k; j++)
 			if (x + w - 1 - k >= 0 && x + w - 1 - k < (int)width && j >= 0 && j < (int)height)
 				SetPixel(x + w - 1 - k, j, borderColor);
+	}
+}
+
+void Image::ScanLineDDA(int x0, int x1, int y, const Color& c)
+{
+	if (y < 0 || y >= (int)height) return;
+
+	if (x0 > x1) { int tmp = x0; x0 = x1; x1 = tmp; }
+
+	for (int x = x0; x <= x1; x++)
+	{
+		if (x >= 0 && x < (int)width)
+			SetPixel((unsigned int)x, (unsigned int)y, c);
+	}
+}
+
+void Image::DrawTriangle(const Vector2& p0, const Vector2& p1, const Vector2& p2,
+	const Color& borderColor, bool isFilled, const Color& fillColor)
+{
+	// 1) BORDER
+	DrawLineDDA((int)p0.x, (int)p0.y, (int)p1.x, (int)p1.y, borderColor);
+	DrawLineDDA((int)p1.x, (int)p1.y, (int)p2.x, (int)p2.y, borderColor);
+	DrawLineDDA((int)p2.x, (int)p2.y, (int)p0.x, (int)p0.y, borderColor);
+
+	if (!isFilled) return;
+
+	// 2) BUILD EDGE TABLE
+	std::vector<std::vector<Edge>> ET(height); // ET[y] = edges that start at y
+
+	auto addEdge = [&](Vector2 a, Vector2 b)
+		{
+			int x0 = (int)a.x; int y0 = (int)a.y;
+			int x1 = (int)b.x; int y1 = (int)b.y;
+
+			if (y0 == y1) return; // ignore horizontal edges
+
+			// make y0 < y1
+			if (y0 > y1) { std::swap(y0, y1); std::swap(x0, x1); }
+
+			Edge e;
+			e.yMax = y1;
+			e.x = (float)x0;
+			e.invSlope = (x1 - x0) / (float)(y1 - y0);
+
+			if (y0 >= 0 && y0 < (int)height)
+				ET[y0].push_back(e);
+		};
+
+	addEdge(p0, p1);
+	addEdge(p1, p2);
+	addEdge(p2, p0);
+
+	// 3) SCANLINE LOOP WITH AET
+	std::vector<Edge> AET;
+
+	for (int y = 0; y < (int)height; y++)
+	{
+		// add edges that start here
+		for (auto& e : ET[y]) AET.push_back(e);
+
+		// remove edges where y == yMax
+		AET.erase(std::remove_if(AET.begin(), AET.end(),
+			[&](const Edge& e) { return y >= e.yMax; }),
+			AET.end());
+
+		// sort by current x
+		std::sort(AET.begin(), AET.end(),
+			[](const Edge& a, const Edge& b) { return a.x < b.x; });
+
+		// fill pairs
+		for (int i = 0; i + 1 < (int)AET.size(); i += 2)
+		{
+			int xStart = (int)std::ceil(AET[i].x);
+			int xEnd = (int)std::floor(AET[i + 1].x);
+			ScanLineDDA(xStart, xEnd, y, fillColor);
+		}
+
+		// update x for next scanline
+		for (auto& e : AET)
+			e.x += e.invSlope;
+	}
+}
+
+void Image::DrawImage(const Image& img, int x, int y)
+{
+	for (int j = 0; j < (int)img.height; j++)
+	{
+		for (int i = 0; i < (int)img.width; i++)
+		{
+			int px = x + i;
+			int py = y + j;
+
+			if (px < 0 || px >= (int)width || py < 0 || py >= (int)height)
+				continue;
+
+			SetPixel((unsigned int)px, (unsigned int)py, img.GetPixel(i, j));
+		}
 	}
 }
 
